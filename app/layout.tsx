@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
-import { Anton, Inter } from 'next/font/google'
+import { Anton, Inter, Geist } from 'next/font/google'
 import './globals.css'
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${anton.variable} min-h-full`}>
+    <html lang="en" className={cn("min-h-full", inter.variable, anton.variable, "font-sans", geist.variable)}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

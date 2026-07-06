@@ -21,7 +21,7 @@ function getRole(index: number, activeIndex: number): JerseyRole {
 
 function StadiumGrain() {
   return (
-    <svg className="pointer-events-none absolute inset-0 z-[3] h-full w-full opacity-[0.18]" aria-hidden>
+    <svg className="pointer-events-none absolute inset-0 z-3 h-full w-full opacity-[0.18]" aria-hidden>
       <filter id="stadium-grain">
         <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" />
       </filter>
