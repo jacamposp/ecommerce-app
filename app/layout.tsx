@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Anton, Inter, Geist } from 'next/font/google'
 import './globals.css'
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
+import { CartDrawer } from '@/components/cart-drawer'
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -38,7 +39,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full overflow-x-hidden antialiased">{children}</body>
+      <body className="min-h-full overflow-x-hidden antialiased">
+        {children}
+        <CartDrawer />
+      </body>
     </html>
   )
 }
