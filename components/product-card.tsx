@@ -3,8 +3,11 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card'
 import { Product } from '@/generated/prisma/client'
+import ProductAddToCart from '@/components/product-addToCart'
 
 export default function ProductCard({ product }: { product: Product }) {
+  const productId = product.id
+  const price = Number(product.price)
   return (
     <Card className="group relative gap-0 overflow-hidden rounded-2xl border-white/8 bg-white/3 py-0 text-white ring-0 transition-all duration-300 hover:border-white/15 hover:bg-white/6">
       <Link href={`/products/${product.slug}`}>
@@ -36,14 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
       </Link>
       <CardFooter className="mt-auto flex items-center justify-between border-0 bg-transparent px-5 pt-5 pb-5">
         <p className="text-lg font-bold text-white">$ {product.price.toFixed(2)}</p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="rounded-full border-white/20 bg-transparent px-4 text-xs font-semibold uppercase tracking-wider text-white hover:border-white/40 hover:bg-white/10 hover:text-white"
-        >
-          Add
-        </Button>
+        <ProductAddToCart productId={productId} price={price} stock={product.stock} />
       </CardFooter>
     </Card>
   )
