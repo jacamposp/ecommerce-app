@@ -1,10 +1,19 @@
 import HeroCarousel from '@/components/hero-carousel'
 import ProductsSection from '@/components/products-section'
+import { toHeroSlide } from '@/lib/hero-slide'
+import { prisma } from '@/lib/prisma'
 
-export default function Home() {
+export default async function Home() {
+  const products = await prisma.product.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 4,
+  })
+
   return (
     <main>
-      <HeroCarousel />
+      <HeroCarousel slides={products.map(toHeroSlide)} />
       <ProductsSection />
     </main>
   )

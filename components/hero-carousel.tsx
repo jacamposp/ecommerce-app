@@ -2,16 +2,13 @@
 
 import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { PRODUCTS } from '@/lib/products'
-
-const JERSEYS = PRODUCTS
+import type { HeroSlide } from '@/lib/hero-slide'
 
 type JerseyRole = 'center' | 'left' | 'right' | 'back'
 
 const ANIMATION_MS = 650
 
-function getRole(index: number, activeIndex: number): JerseyRole {
-  const total = JERSEYS.length
+function getRole(index: number, activeIndex: number, total: number): JerseyRole {
   const diff = (index - activeIndex + total) % total
   if (diff === 0) return 'center'
   if (diff === 1) return 'right'
@@ -30,22 +27,18 @@ function StadiumGrain() {
   )
 }
 
-export default function HeroCarousel() {
+export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [contentKey, setContentKey] = useState(0)
 
-  const active = JERSEYS[activeIndex]
-  const bgText = active.club
-  const bgTagline = activeIndex % 2 === 0 ? 'AUTHENTIC MATCHDAY GEAR' : 'NEW SEASON DROP'
-
   useEffect(() => {
-    JERSEYS.forEach((jersey) => {
+    slides.forEach((slide) => {
       const img = new Image()
-      img.src = jersey.src
+      img.src = slide.image
     })
-  }, [])
+  }, [slides])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -56,17 +49,23 @@ export default function HeroCarousel() {
 
   const navigate = useCallback(
     (direction: 'next' | 'prev') => {
-      if (isAnimating) return
+      if (isAnimating || slides.length === 0) return
       setIsAnimating(true)
       setContentKey((k) => k + 1)
       setActiveIndex((prev) => {
-        const total = JERSEYS.length
+        const total = slides.length
         return direction === 'next' ? (prev + 1) % total : (prev - 1 + total) % total
       })
       setTimeout(() => setIsAnimating(false), ANIMATION_MS)
     },
-    [isAnimating],
+    [isAnimating, slides.length],
   )
+
+  if (slides.length === 0) return null
+
+  const active = slides[activeIndex]
+  const bgText = active.club
+  const bgTagline = activeIndex % 2 === 0 ? 'AUTHENTIC MATCHDAY GEAR' : 'NEW SEASON DROP'
 
   const getJerseyStyles = (role: JerseyRole): CSSProperties => {
     const mobile = isMobile
@@ -148,7 +147,7 @@ export default function HeroCarousel() {
 
       {/* Tagline above giant text */}
       <p
-        className="pointer-events-none absolute left-0 right-0 z-[12] select-none text-center text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70 md:text-xs"
+        className="pointer-events-none absolute left-0 right-0 z-12 select-none text-center text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70 md:text-xs"
         style={{ top: isMobile ? '10%' : '8%' }}
       >
         {bgTagline}
@@ -156,7 +155,7 @@ export default function HeroCarousel() {
 
       {/* Giant background text — bold white, product sits on top */}
       <div
-        className="hero-content-animate pointer-events-none absolute left-0 right-0 z-[12] select-none overflow-hidden px-2 text-center uppercase"
+        className="hero-content-animate pointer-events-none absolute left-0 right-0 z-12 select-none overflow-hidden px-2 text-center uppercase"
         style={{
           top: isMobile ? '13%' : '10%',
           fontFamily: "'Anton', sans-serif",
@@ -194,7 +193,7 @@ export default function HeroCarousel() {
       <div className="absolute inset-0 z-20">
         {/* Stadium lights glow */}
         <div
-          className="pointer-events-none absolute left-1/2 top-[16%] z-[18] h-[50vh] w-[70vw] -translate-x-1/2 rounded-full md:top-[18%]"
+          className="pointer-events-none absolute left-1/2 top-[16%] z-18 h-[50vh] w-[70vw] -translate-x-1/2 rounded-full md:top-[18%]"
           style={{
             background: `radial-gradient(circle, ${active.accent}22 0%, rgba(255,255,255,0.12) 30%, transparent 70%)`,
             transition: `background ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
@@ -202,14 +201,14 @@ export default function HeroCarousel() {
         />
 
         {/* Jerseys */}
-        {JERSEYS.map((jersey, index) => {
-          const role = getRole(index, activeIndex)
+        {slides.map((slide, index) => {
+          const role = getRole(index, activeIndex, slides.length)
           return (
-            <div key={jersey.name} className="overflow-hidden" style={getJerseyStyles(role)}>
+            <div key={slide.id} className="overflow-hidden" style={getJerseyStyles(role)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={jersey.src}
-                alt={`${jersey.club} ${jersey.name}`}
+                src={slide.image}
+                alt={`${slide.club} ${slide.name}`}
                 className="h-full w-full object-cover object-top"
                 draggable={false}
               />
