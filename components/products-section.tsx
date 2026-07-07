@@ -1,7 +1,14 @@
-import { PRODUCTS } from '@/lib/products'
-import ProductCard from '@/components/product-card'
 
-export default function ProductsSection() {
+import ProductCard from '@/components/product-card'
+import { prisma } from '@/lib/prisma'
+import type { Product } from '@/generated/prisma/client'
+
+export default async function ProductsSection() {
+  const products: Product[] = await prisma.product.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 4,
+  })
+
   return (
     <section id="products" className="relative bg-[#0a0a0a] px-6 py-20 md:px-10 md:py-28">
       <div
@@ -25,11 +32,11 @@ export default function ProductsSection() {
           </p>
         </div>
 
-        {/* <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          {PRODUCTS.map((product) => (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+          {products.map((product) => (
             <ProductCard key={product.name} product={product} />
           ))}
-        </div> */}
+        </div>
       </div>
     </section>
   )
