@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils'
 function mapCartItems(items: CartState['items']): SideCartItem[] {
   return items.map((item) => ({
     productId: item.productId,
-    name: 'Product',
     price: item.price,
     quantity: item.quantity,
+    image: item.image,
+    productName: item.productName,
   }))
 }
 

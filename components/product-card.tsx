@@ -39,7 +39,13 @@ export default function ProductCard({ product }: { product: Product }) {
       </Link>
       <CardFooter className="mt-auto flex items-center justify-between border-0 bg-transparent px-5 pt-5 pb-5">
         <p className="text-lg font-bold text-white">$ {product.price.toFixed(2)}</p>
-        <ProductAddToCart productId={productId} price={price} stock={product.stock} />
+        <ProductAddToCart
+          productId={productId}
+          price={price}
+          stock={product.stock}
+          image={product.image}
+          productName={product.name}
+        />
       </CardFooter>
     </Card>
   )

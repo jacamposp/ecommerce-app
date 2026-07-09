@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 
 export type SideCartItem = {
   productId: string
-  name: string
+  productName: string
   image?: string | null
   price: number
   quantity: number
@@ -37,12 +37,12 @@ function CartLineItem({
   onRemoveItem?: (productId: string) => void
 }) {
   const lineTotal = item.price * item.quantity
-
+  console.log(item)
   return (
     <li className="flex gap-4 border-b border-white/8 py-5">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-white/8 bg-white/3">
         {item.image ? (
-          <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover object-top" />
+          <Image src={item.image} alt={item.productName} fill sizes="80px" className="object-cover object-top" />
         ) : (
           <div className="flex h-full items-center justify-center text-white/20">
             <ShoppingBag className="size-6" strokeWidth={1.5} />
@@ -53,7 +53,7 @@ function CartLineItem({
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold uppercase tracking-wide text-white">{item.name}</p>
+            <p className="truncate text-sm font-semibold uppercase tracking-wide text-white">{item.productName}</p>
             {item.size && (
               <p className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">Size {item.size}</p>
             )}
@@ -67,7 +67,7 @@ function CartLineItem({
               type="button"
               onClick={() => onUpdateQuantity?.(item.productId, item.quantity - 1)}
               className={cn(stepperButtonClass, 'rounded-l-full pl-0.5')}
-              aria-label={`Decrease quantity of ${item.name}`}
+              aria-label={`Decrease quantity of ${item.productName}`}
             >
               <Minus className="size-3" strokeWidth={2.5} />
             </button>
@@ -78,7 +78,7 @@ function CartLineItem({
               type="button"
               onClick={() => onUpdateQuantity?.(item.productId, item.quantity + 1)}
               className={cn(stepperButtonClass, 'rounded-r-full pr-0.5')}
-              aria-label={`Increase quantity of ${item.name}`}
+              aria-label={`Increase quantity of ${item.productName}`}
             >
               <Plus className="size-3" strokeWidth={2.5} />
             </button>

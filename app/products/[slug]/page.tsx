@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: Props) {
               <p className="mt-6 text-3xl font-bold tracking-tight">$ {price.toFixed(2)}</p>
             </div>
 
-            <ProductPurchasePanel productId={product.id} price={price} stock={product.stock} />
+            <ProductPurchasePanel productId={product.id} price={price} stock={product.stock} image={product.image} productName={product.name} />
 
             {product.description && (
               <div className="mt-12 border-t border-white/8 pt-10">

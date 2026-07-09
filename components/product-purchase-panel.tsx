@@ -10,11 +10,13 @@ const SIZES = ['S', 'M', 'L', 'XL'] as const
 
 type Props = {
   productId: string
+  productName: string
   price: number
   stock: number
+  image: string | null
 }
 
-export function ProductPurchasePanel({ productId, price, stock }: Props) {
+export function ProductPurchasePanel({ productId, price, stock, productName, image }: Props) {
   const items = useCartStore((state: CartState) => state.items)
   const addItemToCart = useCartStore((state: CartState) => state.addItem)
   const updateQuantity = useCartStore((state: CartState) => state.updateQuantity)
@@ -26,8 +28,6 @@ export function ProductPurchasePanel({ productId, price, stock }: Props) {
 
   const outOfStock = stock <= 0
   const lowStock = stock > 0 && stock <= 10
-
-  console.log('Items:', items)
 
   const handleUpdateQuantity = (nextQty: number) => {
     if (cartItem) {
@@ -93,7 +93,7 @@ export function ProductPurchasePanel({ productId, price, stock }: Props) {
         disabled={outOfStock}
         className="h-12 w-full rounded-full bg-white text-sm font-semibold uppercase tracking-wider text-black hover:bg-white/90 disabled:opacity-40"
         onClick={() => {
-          addItemToCart({ productId, quantity: qty, price: price })
+          addItemToCart({ productId, quantity: qty, price: price, image: image, productName: productName })
         }}
       >
         {outOfStock ? 'Sold out' : 'Add to bag'}

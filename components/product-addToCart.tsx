@@ -9,12 +9,14 @@ type Props = {
   productId: string
   price: number
   stock: number
+  productName: string
+  image: string | null
 }
 
 const stepperButtonClass =
   'flex size-7 shrink-0 items-center justify-center text-white/70 transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-95 disabled:pointer-events-none disabled:opacity-30'
 
-export default function ProductAddToCart({ productId, price, stock }: Props) {
+export default function ProductAddToCart({ productId, price, stock, image, productName }: Props) {
   const items = useCartStore((state: CartState) => state.items)
   const addItem = useCartStore((state: CartState) => state.addItem)
   const updateQuantity = useCartStore((state: CartState) => state.updateQuantity)
@@ -24,8 +26,10 @@ export default function ProductAddToCart({ productId, price, stock }: Props) {
   const handleAddToCart = () => {
     addItem({
       productId,
+      productName,
       quantity: 1,
       price,
+      image,
     })
   }
 
