@@ -8,6 +8,7 @@ export interface CartState {
   items: CartItem[]
   addItem: (item: CartItem) => void
   updateQuantity: (productId: string, quantity: number) => void
+  // cleanCart: () => void
 }
 
 export const useCartStore = create<CartState>()(
@@ -33,6 +34,7 @@ export const useCartStore = create<CartState>()(
               ? state.items.filter((i) => i.productId !== productId)
               : state.items.map((i) => (i.productId === productId ? { ...i, quantity } : i)),
         })),
+      cleanCart: () => set({ items: [] }),
     }),
     {
       name: 'cart-storage',

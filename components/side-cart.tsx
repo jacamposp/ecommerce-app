@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
@@ -123,6 +124,7 @@ function EmptyCart() {
 }
 
 export function SideCart({ open, onClose, items = [], onUpdateQuantity, onRemoveItem }: SideCartProps) {
+  const router = useRouter()
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const hasItems = items.length > 0
@@ -222,6 +224,10 @@ export function SideCart({ open, onClose, items = [], onUpdateQuantity, onRemove
               <Button
                 type="button"
                 className="mt-6 h-12 w-full rounded-full bg-white text-sm font-semibold uppercase tracking-wider text-black hover:bg-white/90"
+                onClick={() => {
+                  onClose()
+                  router.push('/checkout')
+                }}
               >
                 Checkout
               </Button>
