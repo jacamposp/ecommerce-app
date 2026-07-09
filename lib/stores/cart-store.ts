@@ -8,7 +8,7 @@ export interface CartState {
   items: CartItem[]
   addItem: (item: CartItem) => void
   updateQuantity: (productId: string, quantity: number) => void
-  // cleanCart: () => void
+  cleanCart: () => void
 }
 
 export const useCartStore = create<CartState>()(
