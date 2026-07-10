@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { calculateShipping } from '@/lib/shipping'
 
 type CheckoutBody = {
   items: { productId: string; quantity: number }[]
@@ -49,11 +50,14 @@ export async function POST(req: Request) {
       })
     }
 
-    // 3. Create pending order in DB
+    // 3. Compute shipping server-side (never trust client) and create pending order in DB
+    const shipping = calculateShipping(total)
+    const totalWithShipping = total + shipping
+
     const order = await prisma.order.create({
       data: {
         status: 'pending',
-        total,
+        total: totalWithShipping,
         items: {
           create: orderItemsData,
         },
@@ -62,6 +66,35 @@ export async function POST(req: Request) {
     })
 
     // 4. Create Stripe Checkout Session
+    const lineItems = order.items.map((item) => {
+      const product = productById[item.productId]
+      return {
+        quantity: item.quantity,
+        price_data: {
+          currency: 'usd',
+          unit_amount: Math.round(Number(item.price) * 100), // cents
+          product_data: {
+            name: product.name,
+            images: product.image ? [product.image] : undefined,
+          },
+        },
+      }
+    })
+
+    if (shipping > 0) {
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: Math.round(shipping * 100), // cents
+          product_data: {
+            name: 'Shipping',
+            images: undefined,
+          },
+        },
+      })
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -69,20 +102,7 @@ export async function POST(req: Request) {
       metadata: {
         orderId: order.id,
       },
-      line_items: order.items.map((item) => {
-        const product = productById[item.productId]
-        return {
-          quantity: item.quantity,
-          price_data: {
-            currency: 'usd',
-            unit_amount: Math.round(Number(item.price) * 100), // cents
-            product_data: {
-              name: product.name,
-              images: product.image ? [product.image] : undefined,
-            },
-          },
-        }
-      }),
+      line_items: lineItems,
     })
 
     return NextResponse.json({ url: session.url })

@@ -7,9 +7,7 @@ import Link from 'next/link'
 import { Loader2, ShieldCheck, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/stores/cart-store'
 import { Button } from '@/components/ui/button'
-
-const FREE_SHIPPING_THRESHOLD = 100
-const SHIPPING_COST = 12
+import { FREE_SHIPPING_THRESHOLD, calculateShipping } from '@/lib/shipping'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -19,8 +17,8 @@ export default function CheckoutPage() {
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
-  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
-  const shipping = freeShipping ? 0 : SHIPPING_COST
+  const shipping = calculateShipping(subtotal)
+  const freeShipping = shipping === 0
   const total = subtotal + shipping
 
   async function handleCheckout() {
