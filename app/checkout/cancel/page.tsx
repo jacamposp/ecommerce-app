@@ -17,7 +17,7 @@ export default function CheckoutCancelPage() {
           Checkout cancelled
         </h1>
         <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/50">
-          Your order was not completed and you have not been charged. Your cart is still saved if you'd like to try again.
+          Your order was not completed and you have not been charged. Your cart is still saved if you&apos;d like to try again.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">

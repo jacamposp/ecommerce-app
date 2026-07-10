@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calculateShipping } from '@/lib/shipping'
+import { auth } from '@/auth'
 
 type CheckoutBody = {
   items: { productId: string; quantity: number }[]
@@ -9,6 +10,7 @@ type CheckoutBody = {
 
 export async function POST(req: Request) {
   try {
+    const authSession = await auth()
     const body = (await req.json()) as CheckoutBody
 
     if (!body.items?.length) {
@@ -58,6 +60,7 @@ export async function POST(req: Request) {
       data: {
         status: 'pending',
         total: totalWithShipping,
+        userId: authSession?.user?.id,
         items: {
           create: orderItemsData,
         },
