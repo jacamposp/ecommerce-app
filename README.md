@@ -2,7 +2,7 @@
 
 A Next.js storefront selling football jerseys, with Google sign-in, Stripe checkout, and an admin panel for managing products, stock, and orders.
 
-**Stack:** Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind CSS v4 + shadcn/ui · Prisma 7 + PostgreSQL · Auth.js v5 (Google OAuth) · Stripe Checkout
+**Stack:** Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind CSS v4 + shadcn/ui · Prisma 7 + PostgreSQL · Auth.js v5 (Google OAuth) · Stripe Checkout · Vercel Blob (image uploads)
 
 > **Note:** This project runs on a pre-release Next.js 16 build with breaking changes vs. the stable docs you may know — see `AGENTS.md` if you're touching routing/config code.
 
@@ -13,6 +13,7 @@ A Next.js storefront selling football jerseys, with Google sign-in, Stripe check
 - A [Google Cloud](https://console.cloud.google.com/) OAuth client (for sign-in)
 - A [Stripe](https://dashboard.stripe.com/register) account (test mode is fine)
 - The [Stripe CLI](https://docs.stripe.com/stripe-cli) (for forwarding webhooks to your local machine)
+- A [Vercel](https://vercel.com) account with a Blob store (for the admin panel's product image uploads)
 
 ## Setup
 
@@ -38,6 +39,7 @@ Then fill in `.env`:
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud Console → **APIs & Services → Credentials → Create Credentials → OAuth client ID** (Web application). Add `http://localhost:3000/api/auth/callback/google` as an authorized redirect URI. |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → **Developers → API keys** (use the test mode secret key). |
 | `STRIPE_WEBHOOK_SECRET` | See [Stripe webhooks](#stripe-webhooks) below. |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Dashboard → **Storage → Create Database → Blob**, connect it to this project, then copy the token from the store's ".env.local" tab (or run `vercel env pull` if the project is linked with the Vercel CLI). |
 
 ### 3. Set up the database
 

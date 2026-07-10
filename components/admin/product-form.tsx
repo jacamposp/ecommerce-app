@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ImageUploadField } from '@/components/admin/image-upload-field'
 import type { ProductFormState } from '@/app/actions/admin-products'
 
 type ProductFormValues = {
@@ -111,17 +112,7 @@ export function ProductForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="image" className="text-sm font-medium">
-          Image URL
-        </label>
-        <input
-          id="image"
-          name="image"
-          defaultValue={defaultValues?.image}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        />
-      </div>
+      <ImageUploadField name="image" defaultValue={defaultValues?.image} />
 
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
 

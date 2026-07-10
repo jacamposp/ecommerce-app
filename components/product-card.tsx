@@ -23,7 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
             fill
             alt={product.name}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="relative z-10 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+            className="relative z-10 h-full w-full object-contain p-6 transition-transform duration-500 group-hover:scale-[1.04]"
           />
         </div>
 

@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: Props) {
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="relative z-10 object-cover object-top"
+                  className="relative z-10 object-contain p-10"
                 />
               )}
             </div>
