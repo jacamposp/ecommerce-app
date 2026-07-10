@@ -3,6 +3,7 @@ import { Anton, Inter, Geist } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
 import { CartDrawer } from '@/components/cart-drawer'
+import { AccountButton } from '@/components/auth/account-button'
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -41,6 +42,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full overflow-x-hidden antialiased">
         {children}
+        <AccountButton />
         <CartDrawer />
       </body>
     </html>
