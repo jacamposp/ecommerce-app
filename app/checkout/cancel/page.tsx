@@ -1,7 +1,15 @@
 import Link from 'next/link'
 import { XCircle } from 'lucide-react'
+import { cancelPendingOrder } from '@/lib/order-cancellation'
 
-export default function CheckoutCancelPage() {
+type Props = { searchParams: Promise<{ order_id?: string }> }
+
+export default async function CheckoutCancelPage({ searchParams }: Props) {
+  const { order_id: orderId } = await searchParams
+  if (orderId) {
+    await cancelPendingOrder(orderId)
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] px-6 text-center text-white">
       <div className="hero-content-animate flex flex-col items-center">

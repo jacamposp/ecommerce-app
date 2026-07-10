@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { cancelPendingOrder } from '@/lib/order-cancellation'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -65,6 +66,15 @@ export async function POST(req: Request) {
         },
       })
     })
+  }
+
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object
+    const orderId = session.metadata?.orderId
+
+    if (orderId) {
+      await cancelPendingOrder(orderId)
+    }
   }
 
   return NextResponse.json({ received: true })
