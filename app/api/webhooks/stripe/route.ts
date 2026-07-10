@@ -35,37 +35,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
 
-    // Transaction: mark paid + decrement stock
-    await prisma.$transaction(async (tx) => {
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: { items: true },
-      })
-
-      if (!order || order.status === 'paid') return
-
-      for (const item of order.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } })
-        if (!product || product.stock < item.quantity) {
-          throw new Error(`Insufficient stock for product ${item.productId}`)
-        }
-      }
-
-      for (const item of order.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        })
-      }
-
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'paid',
-          stripePaymentId: paymentIntentId ?? session.id,
-        },
-      })
+    // Stock was already reserved atomically when the order was created (see
+    // app/api/checkout/route.ts), so this only needs to flip the order to
+    // paid — not re-validate or decrement stock again. The `status: 'pending'`
+    // guard makes this idempotent if Stripe retries the webhook, and avoids
+    // clobbering an order that was already cancelled (e.g. stock released
+    // back to other buyers) out from under it.
+    const updated = await prisma.order.updateMany({
+      where: { id: orderId, status: 'pending' },
+      data: {
+        status: 'paid',
+        stripePaymentId: paymentIntentId ?? session.id,
+      },
     })
+
+    if (updated.count === 0) {
+      console.error(
+        `checkout.session.completed for order ${orderId}, but it was no longer pending (already paid or cancelled) — needs manual review.`,
+      )
+    }
   }
 
   if (event.type === 'checkout.session.expired') {

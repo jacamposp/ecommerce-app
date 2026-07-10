@@ -1,13 +1,34 @@
 import { prisma } from '@/lib/prisma'
 
 /**
- * Only flips orders that are still `pending` — never clobbers an order that
- * has already been paid/shipped/cancelled (e.g. a race between the webhook
- * marking it paid and the user hitting the cancel/expiry path).
+ * Cancels a pending order and releases the stock it reserved at checkout.
+ *
+ * The `status: 'pending'` guard on the `updateMany` makes the whole thing
+ * safe to call more than once (e.g. the cancel page and the
+ * `checkout.session.expired` webhook both firing for the same order): only
+ * whichever call actually flips the row from `pending` restores stock, so
+ * it's never double-released, and an order that's already `paid` is never
+ * clobbered.
  */
 export async function cancelPendingOrder(orderId: string) {
-  await prisma.order.updateMany({
-    where: { id: orderId, status: 'pending' },
-    data: { status: 'cancelled' },
+  await prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    })
+    if (!order || order.status !== 'pending') return
+
+    const cancelled = await tx.order.updateMany({
+      where: { id: orderId, status: 'pending' },
+      data: { status: 'cancelled' },
+    })
+    if (cancelled.count === 0) return
+
+    for (const item of order.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stock: { increment: item.quantity } },
+      })
+    }
   })
 }

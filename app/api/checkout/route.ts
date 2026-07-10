@@ -3,9 +3,18 @@ import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calculateShipping } from '@/lib/shipping'
 import { auth } from '@/auth'
+import type { Product } from '@/generated/prisma/client'
 
 type CheckoutBody = {
   items: { productId: string; quantity: number }[]
+}
+
+type OrderItemInput = { productId: string; quantity: number; price: Product['price'] }
+
+class InsufficientStockError extends Error {
+  constructor(public productName: string) {
+    super(`Insufficient stock for ${productName}`)
+  }
 }
 
 export async function POST(req: Request) {
@@ -31,7 +40,7 @@ export async function POST(req: Request) {
 
     // 2. Validate stock + build line items
     let total = 0
-    const orderItemsData = []
+    const orderItemsData: OrderItemInput[] = []
 
     for (const item of body.items) {
       const product = productById[item.productId]
@@ -52,23 +61,48 @@ export async function POST(req: Request) {
       })
     }
 
-    // 3. Compute shipping server-side (never trust client) and create pending order in DB
+    // 3. Compute shipping server-side (never trust client)
     const shipping = calculateShipping(total)
     const totalWithShipping = total + shipping
 
-    const order = await prisma.order.create({
-      data: {
-        status: 'pending',
-        total: totalWithShipping,
-        userId: authSession?.user?.id,
-        items: {
-          create: orderItemsData,
-        },
-      },
-      include: { items: true },
-    })
+    // 4. Atomically reserve stock and create the pending order. `updateMany`
+    // with a `stock: { gte }` guard (instead of read-then-write) means
+    // concurrent checkouts for the same product serialize at the database's
+    // row lock, so two buyers can never both reserve the last unit. If any
+    // item fails, the whole transaction rolls back and nothing is reserved.
+    let order
+    try {
+      order = await prisma.$transaction(async (tx) => {
+        for (const item of body.items) {
+          const reserved = await tx.product.updateMany({
+            where: { id: item.productId, stock: { gte: item.quantity } },
+            data: { stock: { decrement: item.quantity } },
+          })
+          if (reserved.count === 0) {
+            throw new InsufficientStockError(productById[item.productId]?.name ?? item.productId)
+          }
+        }
 
-    // 4. Create Stripe Checkout Session
+        return tx.order.create({
+          data: {
+            status: 'pending',
+            total: totalWithShipping,
+            userId: authSession?.user?.id,
+            items: {
+              create: orderItemsData,
+            },
+          },
+          include: { items: true },
+        })
+      })
+    } catch (error) {
+      if (error instanceof InsufficientStockError) {
+        return NextResponse.json({ error: `Not enough stock for ${error.productName}` }, { status: 400 })
+      }
+      throw error
+    }
+
+    // 5. Create Stripe Checkout Session
     const lineItems = order.items.map((item) => {
       const product = productById[item.productId]
       return {
@@ -98,15 +132,32 @@ export async function POST(req: Request) {
       })
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel?order_id=${order.id}`,
-      metadata: {
-        orderId: order.id,
-      },
-      line_items: lineItems,
-    })
+    let session
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel?order_id=${order.id}`,
+        metadata: {
+          orderId: order.id,
+        },
+        line_items: lineItems,
+      })
+    } catch (error) {
+      // No Stripe session was ever created for this order, so nothing will
+      // ever fire a cancel/expiry event to release the reservation above —
+      // release it here instead of leaving the stock stuck as reserved.
+      await prisma.$transaction(async (tx) => {
+        for (const item of order.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+        await tx.order.update({ where: { id: order.id }, data: { status: 'cancelled' } })
+      })
+      throw error
+    }
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
