@@ -23,6 +23,8 @@ function isForeignKeyError(error: unknown) {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2003'
 }
 
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/
+
 type ParsedProduct =
   | { ok: false; error: string }
   | {
@@ -35,6 +37,10 @@ type ParsedProduct =
         stock: number
         image: string | null
         category: string | null
+        club: string | null
+        season: string | null
+        heroBg: string | null
+        heroAccent: string | null
       }
     }
 
@@ -46,8 +52,19 @@ function parseProductForm(formData: FormData): ParsedProduct {
   const stockRaw = String(formData.get('stock') ?? '')
   const image = String(formData.get('image') ?? '').trim()
   const category = String(formData.get('category') ?? '').trim()
+  const club = String(formData.get('club') ?? '').trim()
+  const season = String(formData.get('season') ?? '').trim()
+  const heroBg = String(formData.get('heroBg') ?? '').trim()
+  const heroAccent = String(formData.get('heroAccent') ?? '').trim()
 
   if (!name) return { ok: false, error: 'Name is required.' }
+
+  if (heroBg && !HEX_COLOR_RE.test(heroBg)) {
+    return { ok: false, error: 'Hero background must be a hex color like #1A5276.' }
+  }
+  if (heroAccent && !HEX_COLOR_RE.test(heroAccent)) {
+    return { ok: false, error: 'Hero accent must be a hex color like #B0E2FA.' }
+  }
 
   const price = Number(priceRaw)
   if (!Number.isFinite(price) || price < 0) {
@@ -72,6 +89,10 @@ function parseProductForm(formData: FormData): ParsedProduct {
       stock,
       image: image || null,
       category: category || null,
+      club: club || null,
+      season: season || null,
+      heroBg: heroBg || null,
+      heroAccent: heroAccent || null,
     },
   }
 }
@@ -95,6 +116,7 @@ export async function createProduct(
     return { error: 'Failed to create product.' }
   }
 
+  revalidatePath('/')
   revalidatePath('/admin/products')
   revalidatePath('/products')
   redirect('/admin/products')
@@ -120,6 +142,7 @@ export async function updateProduct(
     return { error: 'Failed to update product.' }
   }
 
+  revalidatePath('/')
   revalidatePath('/admin/products')
   revalidatePath('/products')
   revalidatePath(`/products/${parsed.data.slug}`)
@@ -144,6 +167,7 @@ export async function deleteProduct(
     return { error: 'Failed to delete product.' }
   }
 
+  revalidatePath('/')
   revalidatePath('/admin/products')
   revalidatePath('/products')
   return undefined

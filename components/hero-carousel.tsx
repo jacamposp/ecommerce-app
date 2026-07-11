@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import type { HeroSlide } from '@/lib/hero-slide'
+import { DEFAULT_HERO_COLORS, extractHeroColors, type HeroColors } from '@/lib/extract-image-colors'
 
 type JerseyRole = 'center' | 'left' | 'right' | 'back'
 
@@ -32,13 +33,41 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [isAnimating, setIsAnimating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [contentKey, setContentKey] = useState(0)
+  const [extractedColors, setExtractedColors] = useState<Record<string, HeroColors>>({})
 
   useEffect(() => {
+    let cancelled = false
+
     slides.forEach((slide) => {
       const img = new Image()
       img.src = slide.image
+
+      // Slides without stored theme colors derive them from the jersey image.
+      if (slide.bg === null || slide.accent === null) {
+        extractHeroColors(slide.image)
+          .then((colors) => {
+            if (!cancelled) {
+              setExtractedColors((prev) => ({ ...prev, [slide.id]: colors }))
+            }
+          })
+          .catch(() => {
+            // Extraction failed (CORS, decode error) — DEFAULT_HERO_COLORS applies.
+          })
+      }
     })
+
+    return () => {
+      cancelled = true
+    }
   }, [slides])
+
+  const getColors = useCallback(
+    (slide: HeroSlide): HeroColors => ({
+      bg: slide.bg ?? extractedColors[slide.id]?.bg ?? DEFAULT_HERO_COLORS.bg,
+      accent: slide.accent ?? extractedColors[slide.id]?.accent ?? DEFAULT_HERO_COLORS.accent,
+    }),
+    [extractedColors],
+  )
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -64,6 +93,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   if (slides.length === 0) return null
 
   const active = slides[activeIndex]
+  const activeColors = getColors(active)
   const bgText = active.club
   const bgTagline = activeIndex % 2 === 0 ? 'AUTHENTIC MATCHDAY GEAR' : 'NEW SEASON DROP'
 
@@ -138,7 +168,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     <section
       className="relative h-screen overflow-hidden"
       style={{
-        backgroundColor: active.bg,
+        backgroundColor: activeColors.bg,
         transition: `background-color ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
         fontFamily: "'Inter', sans-serif",
       }}
@@ -164,7 +194,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           color: '#ffffff',
           letterSpacing: '-0.04em',
           lineHeight: 0.9,
-          textShadow: `0 0 80px ${active.accent}66, 0 0 160px ${active.accent}33, 0 12px 40px rgba(0,0,0,0.45)`,
+          textShadow: `0 0 80px ${activeColors.accent}66, 0 0 160px ${activeColors.accent}33, 0 12px 40px rgba(0,0,0,0.45)`,
           transition: `text-shadow ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
         }}
         key={`bgtext-${contentKey}`}
@@ -195,7 +225,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         <div
           className="pointer-events-none absolute left-1/2 top-[16%] z-18 h-[50vh] w-[70vw] -translate-x-1/2 rounded-full md:top-[18%]"
           style={{
-            background: `radial-gradient(circle, ${active.accent}22 0%, rgba(255,255,255,0.12) 30%, transparent 70%)`,
+            background: `radial-gradient(circle, ${activeColors.accent}22 0%, rgba(255,255,255,0.12) 30%, transparent 70%)`,
             transition: `background ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
           }}
         />
@@ -225,7 +255,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         }}
         key={`info-${contentKey}`}
       >
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] md:text-base" style={{ color: active.accent }}>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] md:text-base" style={{ color: activeColors.accent }}>
           {active.name}
         </p>
         <p className="mt-1 text-xs font-medium uppercase tracking-widest opacity-60 md:text-sm">
@@ -237,7 +267,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           className="mt-3 h-[2px]"
           style={{
             width: '120px',
-            background: active.accent,
+            background: activeColors.accent,
             transition: `background ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
           }}
         />
@@ -245,7 +275,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         <p
           className="mt-3 text-2xl font-bold md:text-3xl"
           style={{
-            color: active.accent,
+            color: activeColors.accent,
             transition: `color ${ANIMATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
           }}
         >
@@ -255,7 +285,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
       {/* Bottom left content + navigation */}
       <div className="absolute bottom-8 left-6 z-40 max-w-xs md:bottom-12 md:left-10 md:max-w-sm">
-        <h2 className="text-sm font-bold uppercase tracking-wide md:text-base" style={{ color: active.accent }}>
+        <h2 className="text-sm font-bold uppercase tracking-wide md:text-base" style={{ color: activeColors.accent }}>
           {active.name}
         </h2>
         <p className="mt-2 text-xs leading-relaxed text-white/60 md:text-sm">

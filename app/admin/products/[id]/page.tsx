@@ -33,6 +33,10 @@ export default async function EditProductPage({ params }: Props) {
           stock: product.stock.toString(),
           image: product.image ?? '',
           category: product.category ?? '',
+          club: product.club ?? '',
+          season: product.season ?? '',
+          heroBg: product.heroBg ?? '',
+          heroAccent: product.heroAccent ?? '',
         }}
       />
     </div>

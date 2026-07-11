@@ -77,6 +77,10 @@ model Product {
   image       String?
   stock       Int         @default(0)
   category    String?
+  club        String?
+  season      String?
+  heroBg      String? // hex, e.g. #1A5276
+  heroAccent  String? // hex
   orderItems  OrderItem[]
   createdAt   DateTime    @default(now())
 }

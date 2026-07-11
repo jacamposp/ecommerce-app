@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import type { ProductFormState } from '@/app/actions/admin-products'
@@ -13,6 +13,57 @@ type ProductFormValues = {
   stock: string
   image: string
   category: string
+  club: string
+  season: string
+  heroBg: string
+  heroAccent: string
+}
+
+function ColorField({
+  name,
+  label,
+  defaultValue,
+}: {
+  name: string
+  label: string
+  defaultValue?: string
+}) {
+  const [value, setValue] = useState(defaultValue ?? '')
+
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={name} className="text-sm font-medium">
+        {label} <span className="font-normal text-muted-foreground">(optional)</span>
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          id={name}
+          name={name}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="Auto from image"
+          pattern="#[0-9a-fA-F]{6}"
+          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        />
+        <input
+          type="color"
+          aria-label={`${label} picker`}
+          value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#000000'}
+          onChange={(event) => setValue(event.target.value)}
+          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => setValue('')}
+            className="shrink-0 text-xs text-muted-foreground hover:underline"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export function ProductForm({
@@ -113,6 +164,47 @@ export function ProductForm({
       </div>
 
       <ImageUploadField name="image" defaultValue={defaultValues?.image} />
+
+      <fieldset className="space-y-5 rounded-md border border-input p-4">
+        <legend className="px-1 text-sm font-semibold">Hero appearance</legend>
+        <p className="text-xs text-muted-foreground">
+          Controls how this jersey looks in the home page hero. Anything left blank is derived
+          automatically from the product name and image.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label htmlFor="club" className="text-sm font-medium">
+              Club display name
+            </label>
+            <input
+              id="club"
+              name="club"
+              defaultValue={defaultValues?.club}
+              placeholder="Auto from name"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="season" className="text-sm font-medium">
+              Season
+            </label>
+            <input
+              id="season"
+              name="season"
+              defaultValue={defaultValues?.season}
+              placeholder="Auto from name"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <ColorField name="heroBg" label="Background color" defaultValue={defaultValues?.heroBg} />
+          <ColorField name="heroAccent" label="Accent color" defaultValue={defaultValues?.heroAccent} />
+        </div>
+      </fieldset>
 
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
 
