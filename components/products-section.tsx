@@ -1,4 +1,6 @@
 
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import ProductCard from '@/components/product-card'
 import { prisma } from '@/lib/prisma'
 import type { Product } from '@/generated/prisma/client'
@@ -27,9 +29,18 @@ export default async function ProductsSection() {
               Featured Kits
             </h2>
           </div>
-          <p className="max-w-md text-sm leading-relaxed text-white/50 md:text-base">
-            Official-inspired jerseys from Europe&apos;s elite clubs. Engineered for matchday, built for supporters.
-          </p>
+          <div className="flex flex-col items-start gap-4 md:items-end">
+            <p className="max-w-md text-sm leading-relaxed text-white/50 md:text-base">
+              Official-inspired jerseys from Europe&apos;s elite clubs. Engineered for matchday, built for supporters.
+            </p>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:text-white/70"
+            >
+              View all kits
+              <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
