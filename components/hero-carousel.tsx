@@ -247,12 +247,14 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         })}
       </div>
 
-      {/* Center product information */}
+      {/* Center product information — desktop only. On mobile this block and the
+          bottom-left block are both anchored near the bottom of a viewport-height
+          section, and their combined height can exceed short viewports (e.g. an
+          iPhone SE at 320x568), so on mobile the price is folded into the single
+          bottom-left block below instead of floating a second block over the jersey. */}
       <div
-        className="hero-content-animate absolute left-1/2 z-40 flex -translate-x-1/2 flex-col items-center text-center text-white"
-        style={{
-          top: isMobile ? '66%' : '64%',
-        }}
+        className="hero-content-animate absolute left-1/2 z-40 hidden -translate-x-1/2 flex-col items-center text-center text-white md:flex"
+        style={{ top: '64%' }}
         key={`info-${contentKey}`}
       >
         <p className="text-sm font-semibold uppercase tracking-[0.3em] md:text-base" style={{ color: activeColors.accent }}>
@@ -285,9 +287,19 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
       {/* Bottom left content + navigation */}
       <div className="absolute bottom-8 left-6 z-40 max-w-xs md:bottom-12 md:left-10 md:max-w-sm">
-        <h2 className="text-sm font-bold uppercase tracking-wide md:text-base" style={{ color: activeColors.accent }}>
+        <h2
+          className="line-clamp-2 text-sm font-bold uppercase tracking-wide md:text-base"
+          style={{ color: activeColors.accent }}
+        >
           {active.name}
         </h2>
+        {/* Price is shown here on mobile only — see note above the desktop center-info block. */}
+        <p className="mt-1 text-xl font-bold md:hidden" style={{ color: activeColors.accent }}>
+          {active.price}
+          <span className="ml-2 text-xs font-medium uppercase tracking-widest text-white/60">
+            {active.season} Season
+          </span>
+        </p>
         <p className="mt-2 text-xs leading-relaxed text-white/60 md:text-sm">
           Engineered for performance and designed for supporters. Discover official kits inspired by the world&apos;s
           biggest clubs and competitions.
