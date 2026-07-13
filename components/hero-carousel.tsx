@@ -207,7 +207,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo-icon.png"
-          alt="Elite Football"
+          alt="Elite Soccer"
           className="h-9 w-9 object-contain md:h-11 md:w-11"
           draggable={false}
         />
@@ -215,7 +215,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           className="text-xs font-bold uppercase tracking-[0.2em] text-white md:text-sm"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
-          Elite Football
+          Elite Soccer
         </p>
       </div>
 

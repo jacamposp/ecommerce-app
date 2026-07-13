@@ -1,6 +1,6 @@
-# Elite Football — Ecommerce App
+# Elite Soccer — Ecommerce App
 
-A Next.js storefront selling football jerseys, with Google sign-in, Stripe checkout, and an admin panel for managing products, stock, and orders.
+A Next.js storefront selling soccer jerseys, with Google sign-in, Stripe checkout, and an admin panel for managing products, stock, and orders.
 
 **Stack:** Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind CSS v4 + shadcn/ui · Prisma 7 + PostgreSQL · Auth.js v5 (Google OAuth) · Stripe Checkout · Vercel Blob (image uploads)
 

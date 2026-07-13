@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return { title: 'Product not found' }
 
   return {
-    title: `${product.name} — Elite Football`,
+    title: `${product.name} — Elite Soccer`,
     description: product.description ?? undefined,
     openGraph: {
       title: product.name,

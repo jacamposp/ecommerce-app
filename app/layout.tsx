@@ -21,9 +21,9 @@ const anton = Anton({
 })
 
 export const metadata: Metadata = {
-  title: 'Elite Football — Authentic Matchday Jerseys',
+  title: 'Elite Soccer — Authentic Matchday Jerseys',
   description:
-    "Premium football kits inspired by the world's biggest clubs. Home, away, and special edition jerseys for the 2026 season.",
+    "Premium soccer kits inspired by the world's biggest clubs. Home, away, and special edition jerseys for the 2026 season.",
 }
 
 export default function RootLayout({
