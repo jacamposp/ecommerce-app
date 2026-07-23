@@ -31,6 +31,7 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         items: items.map((i) => ({
           productId: i.productId,
+          size: i.size,
           quantity: i.quantity,
         })),
       }),
@@ -106,7 +107,7 @@ export default function CheckoutPage() {
 
             <ul>
               {items.map((item) => (
-                <li key={item.productId} className="flex gap-4 border-b border-white/8 py-5">
+                <li key={`${item.productId}-${item.size}`} className="flex gap-4 border-b border-white/8 py-5">
                   <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-white/8 bg-white/3">
                     {item.image ? (
                       <Image
@@ -130,7 +131,7 @@ export default function CheckoutPage() {
                           {item.productName}
                         </p>
                         <p className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">
-                          Qty {item.quantity}
+                          Size {item.size} · Qty {item.quantity}
                         </p>
                       </div>
                       <p className="shrink-0 text-sm font-bold tabular-nums text-white">

@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@/generated/prisma/client'
+import { STOCK_FIELD, type Size } from '@/lib/types'
 
 /**
  * Cancels a pending order and releases the stock it reserved at checkout.
@@ -27,7 +29,7 @@ export async function cancelPendingOrder(orderId: string) {
     for (const item of order.items) {
       await tx.product.update({
         where: { id: item.productId },
-        data: { stock: { increment: item.quantity } },
+        data: { [STOCK_FIELD[item.size as Size]]: { increment: item.quantity } } as Prisma.ProductUpdateInput,
       })
     }
   })

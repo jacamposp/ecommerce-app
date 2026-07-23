@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { DeleteProductButton } from '@/components/admin/delete-product-button'
+import { SIZES, stockBySize, totalStock } from '@/lib/types'
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } })
@@ -31,7 +32,10 @@ export default async function AdminProductsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {products.map((product) => (
+            {products.map((product) => {
+              const total = totalStock(product)
+              const sizeStock = stockBySize(product)
+              return (
               <tr key={product.id}>
                 <td className="px-4 py-3">
                   <Link href={`/admin/products/${product.id}`} className="font-medium hover:underline">
@@ -45,15 +49,22 @@ export default async function AdminProductsPage() {
                   <span
                     className={cn(
                       'rounded-full px-2 py-0.5 text-xs font-medium tabular-nums',
-                      product.stock <= 0
+                      total <= 0
                         ? 'bg-destructive/10 text-destructive'
-                        : product.stock <= 5
+                        : total <= 5
                           ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                           : 'bg-muted text-muted-foreground',
                     )}
                   >
-                    {product.stock}
+                    {total}
                   </span>
+                  <div className="mt-1 flex gap-2 text-[11px] tabular-nums text-muted-foreground">
+                    {SIZES.map((s) => (
+                      <span key={s} className={cn(sizeStock[s] <= 0 && 'text-destructive/70')}>
+                        {s}:{sizeStock[s]}
+                      </span>
+                    ))}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
@@ -66,7 +77,8 @@ export default async function AdminProductsPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+              )
+            })}
             {products.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">

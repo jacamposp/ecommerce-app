@@ -132,7 +132,7 @@ export default async function OrderHistoryPage() {
                               {item.product.name}
                             </p>
                             <p className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">
-                              Qty {item.quantity}
+                              Size {item.size} · Qty {item.quantity}
                             </p>
                           </div>
                           <p className="shrink-0 text-sm font-bold tabular-nums text-white">

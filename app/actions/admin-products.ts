@@ -34,7 +34,10 @@ type ParsedProduct =
         slug: string
         description: string | null
         price: number
-        stock: number
+        stockS: number
+        stockM: number
+        stockL: number
+        stockXL: number
         image: string | null
         category: string | null
         club: string | null
@@ -49,7 +52,6 @@ function parseProductForm(formData: FormData): ParsedProduct {
   const slugInput = String(formData.get('slug') ?? '').trim()
   const description = String(formData.get('description') ?? '').trim()
   const priceRaw = String(formData.get('price') ?? '')
-  const stockRaw = String(formData.get('stock') ?? '')
   const image = String(formData.get('image') ?? '').trim()
   const category = String(formData.get('category') ?? '').trim()
   const club = String(formData.get('club') ?? '').trim()
@@ -71,9 +73,16 @@ function parseProductForm(formData: FormData): ParsedProduct {
     return { ok: false, error: 'Price must be a positive number.' }
   }
 
-  const stock = Number(stockRaw)
-  if (!Number.isInteger(stock) || stock < 0) {
-    return { ok: false, error: 'Stock must be a whole, non-negative number.' }
+  const parseSizeStock = (name: string) => {
+    const value = Number(String(formData.get(name) ?? ''))
+    return Number.isInteger(value) && value >= 0 ? value : null
+  }
+  const stockS = parseSizeStock('stockS')
+  const stockM = parseSizeStock('stockM')
+  const stockL = parseSizeStock('stockL')
+  const stockXL = parseSizeStock('stockXL')
+  if (stockS === null || stockM === null || stockL === null || stockXL === null) {
+    return { ok: false, error: 'Each size stock must be a whole, non-negative number.' }
   }
 
   const slug = slugify(slugInput || name)
@@ -86,7 +95,10 @@ function parseProductForm(formData: FormData): ParsedProduct {
       slug,
       description: description || null,
       price,
-      stock,
+      stockS,
+      stockM,
+      stockL,
+      stockXL,
       image: image || null,
       category: category || null,
       club: club || null,

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 function mapCartItems(items: CartState['items']): SideCartItem[] {
   return items.map((item) => ({
     productId: item.productId,
+    size: item.size,
     price: item.price,
     quantity: item.quantity,
     image: item.image,
@@ -46,7 +47,7 @@ export function CartDrawer() {
         onClose={() => setOpen(false)}
         items={mapCartItems(items)}
         onUpdateQuantity={updateQuantity}
-        onRemoveItem={(productId) => updateQuantity(productId, 0)}
+        onRemoveItem={(productId, size) => updateQuantity(productId, size, 0)}
       />
     </>
   )

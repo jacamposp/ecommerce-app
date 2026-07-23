@@ -4,13 +4,17 @@ import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import type { ProductFormState } from '@/app/actions/admin-products'
+import { SIZES } from '@/lib/types'
 
 type ProductFormValues = {
   name: string
   slug: string
   description: string
   price: string
-  stock: string
+  stockS: string
+  stockM: string
+  stockL: string
+  stockXL: string
   image: string
   category: string
   club: string
@@ -117,39 +121,47 @@ export function ProductForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label htmlFor="price" className="text-sm font-medium">
-            Price (USD)
-          </label>
-          <input
-            id="price"
-            name="price"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            defaultValue={defaultValues?.price}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="stock" className="text-sm font-medium">
-            Stock
-          </label>
-          <input
-            id="stock"
-            name="stock"
-            type="number"
-            step="1"
-            min="0"
-            required
-            defaultValue={defaultValues?.stock}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          />
-        </div>
+      <div className="space-y-1.5">
+        <label htmlFor="price" className="text-sm font-medium">
+          Price (USD)
+        </label>
+        <input
+          id="price"
+          name="price"
+          type="number"
+          step="0.01"
+          min="0"
+          required
+          defaultValue={defaultValues?.price}
+          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        />
       </div>
+
+      <fieldset className="space-y-3 rounded-md border border-input p-4">
+        <legend className="px-1 text-sm font-semibold">Stock by size</legend>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {SIZES.map((s) => {
+            const field = `stock${s}` as const
+            return (
+              <div key={s} className="space-y-1.5">
+                <label htmlFor={field} className="text-sm font-medium">
+                  {s}
+                </label>
+                <input
+                  id={field}
+                  name={field}
+                  type="number"
+                  step="1"
+                  min="0"
+                  required
+                  defaultValue={defaultValues?.[field]}
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                />
+              </div>
+            )
+          })}
+        </div>
+      </fieldset>
 
       <div className="space-y-1.5">
         <label htmlFor="category" className="text-sm font-medium">

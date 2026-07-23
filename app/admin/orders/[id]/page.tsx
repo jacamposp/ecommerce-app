@@ -44,7 +44,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{item.product.name}</p>
-                      <p className="text-xs text-muted-foreground">Qty {item.quantity}</p>
+                      <p className="text-xs text-muted-foreground">Size {item.size} · Qty {item.quantity}</p>
                     </div>
                     <p className="text-sm font-medium tabular-nums">
                       $ {(Number(item.price) * item.quantity).toFixed(2)}

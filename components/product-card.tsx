@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card'
 import { Product } from '@/generated/prisma/client'
 import ProductAddToCart from '@/components/product-addToCart'
+import { stockBySize } from '@/lib/types'
 
 export default function ProductCard({ product }: { product: Product }) {
   const productId = product.id
@@ -42,7 +43,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <ProductAddToCart
           productId={productId}
           price={price}
-          stock={product.stock}
+          stock={stockBySize(product)}
           image={product.image}
           productName={product.name}
         />

@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { totalStock } from '@/lib/types'
 
 export default async function AdminDashboardPage() {
-  const [productCount, lowStockCount, orderCount, pendingOrderCount, revenueAgg, recentOrders] = await Promise.all([
+  const [productCount, stockRows, orderCount, pendingOrderCount, revenueAgg, recentOrders] = await Promise.all([
     prisma.product.count(),
-    prisma.product.count({ where: { stock: { lte: 5 } } }),
+    prisma.product.findMany({ select: { stockS: true, stockM: true, stockL: true, stockXL: true } }),
     prisma.order.count(),
     prisma.order.count({ where: { status: 'pending' } }),
     prisma.order.aggregate({ where: { status: { in: ['paid', 'shipped'] } }, _sum: { total: true } }),
@@ -15,6 +16,9 @@ export default async function AdminDashboardPage() {
       include: { user: true },
     }),
   ])
+
+  // A product counts as low stock when its total across all sizes is ≤ 5.
+  const lowStockCount = stockRows.filter((p) => totalStock(p) <= 5).length
 
   const stats = [
     { label: 'Products', value: productCount, href: '/admin/products' },

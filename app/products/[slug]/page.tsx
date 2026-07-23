@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/product-card'
 import { ProductPurchasePanel } from '@/components/product-purchase-panel'
+import { stockBySize } from '@/lib/types'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -91,7 +92,7 @@ export default async function ProductPage({ params }: Props) {
               <p className="mt-6 text-3xl font-bold tracking-tight">$ {price.toFixed(2)}</p>
             </div>
 
-            <ProductPurchasePanel productId={product.id} price={price} stock={product.stock} image={product.image} productName={product.name} />
+            <ProductPurchasePanel productId={product.id} price={price} stock={stockBySize(product)} image={product.image} productName={product.name} />
 
             {product.description && (
               <div className="mt-12 border-t border-white/8 pt-10">

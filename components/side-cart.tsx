@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { Size } from '@/lib/types'
 
 export type SideCartItem = {
   productId: string
@@ -14,15 +15,15 @@ export type SideCartItem = {
   image?: string | null
   price: number
   quantity: number
-  size?: string
+  size: Size
 }
 
 type SideCartProps = {
   open: boolean
   onClose: () => void
   items?: SideCartItem[]
-  onUpdateQuantity?: (productId: string, quantity: number) => void
-  onRemoveItem?: (productId: string) => void
+  onUpdateQuantity?: (productId: string, size: Size, quantity: number) => void
+  onRemoveItem?: (productId: string, size: Size) => void
 }
 
 const stepperButtonClass =
@@ -34,11 +35,10 @@ function CartLineItem({
   onRemoveItem,
 }: {
   item: SideCartItem
-  onUpdateQuantity?: (productId: string, quantity: number) => void
-  onRemoveItem?: (productId: string) => void
+  onUpdateQuantity?: (productId: string, size: Size, quantity: number) => void
+  onRemoveItem?: (productId: string, size: Size) => void
 }) {
   const lineTotal = item.price * item.quantity
-  console.log(item)
   return (
     <li className="flex gap-4 border-b border-white/8 py-5">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-white/8 bg-white/3">
@@ -55,9 +55,7 @@ function CartLineItem({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold uppercase tracking-wide text-white">{item.productName}</p>
-            {item.size && (
-              <p className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">Size {item.size}</p>
-            )}
+            <p className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">Size {item.size}</p>
           </div>
           <p className="shrink-0 text-sm font-bold tabular-nums text-white">$ {lineTotal.toFixed(2)}</p>
         </div>
@@ -66,7 +64,7 @@ function CartLineItem({
           <div className="inline-flex h-7 items-center rounded-full border border-white/15 bg-white/3">
             <button
               type="button"
-              onClick={() => onUpdateQuantity?.(item.productId, item.quantity - 1)}
+              onClick={() => onUpdateQuantity?.(item.productId, item.size, item.quantity - 1)}
               className={cn(stepperButtonClass, 'rounded-l-full pl-0.5')}
               aria-label={`Decrease quantity of ${item.productName}`}
             >
@@ -77,7 +75,7 @@ function CartLineItem({
             </span>
             <button
               type="button"
-              onClick={() => onUpdateQuantity?.(item.productId, item.quantity + 1)}
+              onClick={() => onUpdateQuantity?.(item.productId, item.size, item.quantity + 1)}
               className={cn(stepperButtonClass, 'rounded-r-full pr-0.5')}
               aria-label={`Increase quantity of ${item.productName}`}
             >
@@ -87,7 +85,7 @@ function CartLineItem({
 
           <button
             type="button"
-            onClick={() => onRemoveItem?.(item.productId)}
+            onClick={() => onRemoveItem?.(item.productId, item.size)}
             className="text-xs font-semibold uppercase tracking-wider text-white/35 transition-colors hover:text-white/70"
           >
             Remove
@@ -198,7 +196,7 @@ export function SideCart({ open, onClose, items = [], onUpdateQuantity, onRemove
             <ul className="flex-1 overflow-y-auto px-6">
               {items.map((item) => (
                 <CartLineItem
-                  key={item.productId}
+                  key={`${item.productId}-${item.size}`}
                   item={item}
                   onUpdateQuantity={onUpdateQuantity}
                   onRemoveItem={onRemoveItem}
